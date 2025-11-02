@@ -104,12 +104,22 @@ const Home = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden min-h-screen flex items-center">
+        {/* Animated Circuit Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
+          <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M 60 0 L 0 60 M 30 0 L 0 30 M 60 30 L 30 60" stroke="rgba(249, 115, 22, 0.1)" strokeWidth="1" fill="none"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
+          
+          {[...Array(15)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 bg-orange-500/30 rounded-full"
+              className="absolute w-2 h-2 bg-orange-500/40 rounded-full"
               initial={{ 
                 x: typeof window !== 'undefined' ? Math.random() * window.innerWidth : 0, 
                 y: typeof window !== 'undefined' ? Math.random() * window.innerHeight : 0,
@@ -120,7 +130,7 @@ const Home = () => {
                 opacity: [0, 1, 0]
               }}
               transition={{
-                duration: Math.random() * 3 + 2,
+                duration: Math.random() * 4 + 3,
                 repeat: Infinity,
                 delay: Math.random() * 2
               }}
@@ -135,41 +145,80 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
+            {/* Large Logo Image */}
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
-              className="inline-block mb-6"
+              className="mb-8"
             >
-              <div className="relative inline-flex">
-                <Hexagon className="w-24 h-24 text-orange-500 fill-orange-500/10" />
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <Code className="w-10 h-10 text-orange-500" />
-                </motion.div>
-              </div>
+              <img 
+                src="https://customer-assets.emergentagent.com/job_5dad80a5-5b92-47a9-9d97-b86aa98507ee/artifacts/2wtib7ez_Screenshot%202025-10-07%20201022.png" 
+                alt="TechyHive Logo" 
+                className="w-64 h-64 mx-auto object-contain"
+              />
             </motion.div>
 
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="text-white">Build Your</span>
+              <span className="text-white">Transforming Ideas into</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">
-                Academic Success
+                Digital Solutions
               </span>
             </h1>
             
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Professional college-level projects across all computer science domains. From implementation papers to complete portfolios, we've got you covered.
+            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+              Your trusted partner for professional & innovative college projects in <span className="text-orange-500 font-semibold">Computer Science, AI, Data Science, IoT, and Electronics</span>. Complete with documentation, presentations, and implementation support.
             </p>
+
+            {/* Domain Icons */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-wrap justify-center gap-6 mb-10"
+            >
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
+                  <Code className="w-8 h-8 text-orange-500" />
+                </div>
+                <span className="text-sm text-gray-400">CS Projects</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
+                  <Sparkles className="w-8 h-8 text-orange-500" />
+                </div>
+                <span className="text-sm text-gray-400">AI/ML</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
+                  <Terminal className="w-8 h-8 text-orange-500" />
+                </div>
+                <span className="text-sm text-gray-400">Data Science</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
+                  <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                  </svg>
+                </div>
+                <span className="text-sm text-gray-400">IoT</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
+                  <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <span className="text-sm text-gray-400">Electronics</span>
+              </div>
+            </motion.div>
 
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-wrap justify-center gap-4"
+              transition={{ delay: 0.6 }}
+              className="flex flex-wrap justify-center gap-4 mb-16"
             >
               <a href="#contact">
                 <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 text-lg">
@@ -177,11 +226,36 @@ const Home = () => {
                   <Send className="ml-2 w-5 h-5" />
                 </Button>
               </a>
-              <a href="https://instagram.com/techyhive" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-500/10 px-8 py-6 text-lg">
-                  Follow @techyhive
+              <a href="#portfolio">
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg">
+                  View Our Work
                 </Button>
               </a>
+            </motion.div>
+
+            {/* Stats Row */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
+            >
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">500+</div>
+                <div className="text-sm text-gray-400">Projects Completed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">50+</div>
+                <div className="text-sm text-gray-400">Happy Clients</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">5</div>
+                <div className="text-sm text-gray-400">Years Experience</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">24/7</div>
+                <div className="text-sm text-gray-400">Support Available</div>
+              </div>
             </motion.div>
           </motion.div>
         </div>

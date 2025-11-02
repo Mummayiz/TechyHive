@@ -305,6 +305,71 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Portfolio Section */}
+      <section id="portfolio" className="py-20 px-6 bg-slate-800/30">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Our <span className="text-orange-500">Portfolio</span>
+            </h2>
+            <p className="text-gray-400 text-lg">Showcasing our best work and successful projects</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "AI Chatbot System", category: "Machine Learning", description: "Advanced conversational AI with NLP capabilities" },
+              { title: "IoT Smart Home", category: "Internet of Things", description: "Complete home automation with sensor integration" },
+              { title: "Blockchain Voting", category: "Blockchain", description: "Secure and transparent voting system" },
+              { title: "Data Analytics Dashboard", category: "Data Science", description: "Real-time analytics with visualization" },
+              { title: "Mobile E-commerce App", category: "Mobile Development", description: "Full-featured shopping application" },
+              { title: "Computer Vision System", category: "AI/CV", description: "Object detection and recognition system" }
+            ].map((project, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="bg-slate-800/50 border-slate-700 hover:border-orange-500/50 transition-all duration-300 h-full group overflow-hidden">
+                  <div className="h-48 bg-gradient-to-br from-orange-500/20 to-slate-900 relative overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Code className="w-20 h-20 text-orange-500/30 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="absolute top-4 right-4">
+                      <span className="bg-orange-500/20 text-orange-500 text-xs px-3 py-1 rounded-full border border-orange-500/30">
+                        {project.category}
+                      </span>
+                    </div>
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="text-white text-lg">{project.title}</CardTitle>
+                    <CardDescription className="text-gray-400">{project.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <p className="text-gray-400 mb-4">Want to see more of our work?</p>
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+              View Complete Portfolio
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
       {/* About Section */}
       <section id="about" className="py-20 px-6 bg-slate-800/30">
         <div className="container mx-auto max-w-6xl">

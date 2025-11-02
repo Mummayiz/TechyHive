@@ -92,10 +92,12 @@ const Home = () => {
               animate={{ opacity: 1, x: 0 }}
               className="hidden md:flex items-center gap-8"
             >
+              <a href="#home" className="text-gray-300 hover:text-orange-500 transition-colors">Home</a>
               <a href="#services" className="text-gray-300 hover:text-orange-500 transition-colors">Services</a>
-              <a href="#about" className="text-gray-300 hover:text-orange-500 transition-colors">About</a>
+              <a href="#portfolio" className="text-gray-300 hover:text-orange-500 transition-colors">Portfolio</a>
               <a href="#testimonials" className="text-gray-300 hover:text-orange-500 transition-colors">Testimonials</a>
-              <a href="#contact" className="text-gray-300 hover:text-orange-500 transition-colors">
+              <a href="#contact" className="text-gray-300 hover:text-orange-500 transition-colors">Contact</a>
+              <a href="#contact">
                 <Button className="bg-orange-500 hover:bg-orange-600 text-white">Get Started</Button>
               </a>
             </motion.div>

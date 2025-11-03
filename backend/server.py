@@ -37,6 +37,31 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+class ContactSubmission(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    email: str
+    phone: str = ""
+    project_type: str
+    domain: str = ""
+    deadline: str = ""
+    budget: str = ""
+    description: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    status: str = "pending"  # pending, contacted, completed
+
+class ContactSubmissionCreate(BaseModel):
+    name: str
+    email: str
+    phone: str = ""
+    project_type: str
+    domain: str = ""
+    deadline: str = ""
+    budget: str = ""
+    description: str
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():

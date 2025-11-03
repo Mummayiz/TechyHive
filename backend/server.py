@@ -110,21 +110,27 @@ async def create_contact_submission(input: ContactSubmissionCreate):
         # Send admin notification
         admin_email = os.environ.get('SMTP_USER')
         admin_html = email_service.get_admin_notification_template(contact_dict)
-        await email_service.send_email(
+        admin_success = await email_service.send_email(
             to_email=admin_email,
             subject=f"🔔 New Contact Form Submission from {contact_obj.name}",
             html_content=admin_html
         )
-        logger.info(f"Admin notification sent to {admin_email}")
+        if admin_success:
+            logger.info(f"Admin notification sent to {admin_email}")
+        else:
+            logger.error(f"Failed to send admin notification to {admin_email}")
         
         # Send user confirmation
         user_html = email_service.get_user_confirmation_template(contact_obj.name)
-        await email_service.send_email(
+        user_success = await email_service.send_email(
             to_email=contact_obj.email,
             subject="✅ We've Received Your Request - TechyHive",
             html_content=user_html
         )
-        logger.info(f"Confirmation email sent to {contact_obj.email}")
+        if user_success:
+            logger.info(f"Confirmation email sent to {contact_obj.email}")
+        else:
+            logger.error(f"Failed to send confirmation email to {contact_obj.email}")
     except Exception as e:
         logger.error(f"Error sending emails: {str(e)}")
         # Don't fail the request if email fails, just log it

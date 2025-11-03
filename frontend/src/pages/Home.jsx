@@ -340,12 +340,42 @@ const Home = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: "AI Chatbot System", category: "Machine Learning", description: "Advanced conversational AI with NLP capabilities" },
-              { title: "IoT Smart Home", category: "Internet of Things", description: "Complete home automation with sensor integration" },
-              { title: "Blockchain Voting", category: "Blockchain", description: "Secure and transparent voting system" },
-              { title: "Data Analytics Dashboard", category: "Data Science", description: "Real-time analytics with visualization" },
-              { title: "Mobile E-commerce App", category: "Mobile Development", description: "Full-featured shopping application" },
-              { title: "Computer Vision System", category: "AI/CV", description: "Object detection and recognition system" }
+              { 
+                title: "AI Chatbot System", 
+                category: "Machine Learning", 
+                description: "Advanced conversational AI with NLP capabilities",
+                image: "https://images.unsplash.com/photo-1717501217835-821cc3aefbc3?w=800&q=80"
+              },
+              { 
+                title: "IoT Smart Home", 
+                category: "Internet of Things", 
+                description: "Complete home automation with sensor integration",
+                image: "https://images.unsplash.com/photo-1518444667766-94728310399f?w=800&q=80"
+              },
+              { 
+                title: "Blockchain Voting", 
+                category: "Blockchain", 
+                description: "Secure and transparent voting system",
+                image: "https://images.unsplash.com/photo-1639815188546-c43c240ff4df?w=800&q=80"
+              },
+              { 
+                title: "Data Analytics Dashboard", 
+                category: "Data Science", 
+                description: "Real-time analytics with visualization",
+                image: "https://images.unsplash.com/photo-1650327034581-1711a15a5430?w=800&q=80"
+              },
+              { 
+                title: "Mobile E-commerce App", 
+                category: "Mobile Development", 
+                description: "Full-featured shopping application",
+                image: "https://images.pexels.com/photos/5475750/pexels-photo-5475750.jpeg?w=800&q=80"
+              },
+              { 
+                title: "Computer Vision System", 
+                category: "AI/CV", 
+                description: "Object detection and recognition system",
+                image: "https://images.unsplash.com/photo-1717501220374-9f4b2a3a60c9?w=800&q=80"
+              }
             ].map((project, index) => (
               <motion.div
                 key={index}
@@ -353,20 +383,29 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -10 }}
               >
                 <Card className="bg-slate-800/50 border-slate-700 hover:border-orange-500/50 transition-all duration-300 h-full group overflow-hidden">
-                  <div className="h-48 bg-gradient-to-br from-orange-500/20 to-slate-900 relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Code className="w-20 h-20 text-orange-500/30 group-hover:scale-110 transition-transform" />
-                    </div>
+                  <div className="h-48 relative overflow-hidden">
+                    <motion.img 
+                      src={project.image} 
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                     <div className="absolute top-4 right-4">
-                      <span className="bg-orange-500/20 text-orange-500 text-xs px-3 py-1 rounded-full border border-orange-500/30">
+                      <motion.span 
+                        className="bg-orange-500/90 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full border border-orange-400"
+                        whileHover={{ scale: 1.05 }}
+                      >
                         {project.category}
-                      </span>
+                      </motion.span>
                     </div>
                   </div>
                   <CardHeader>
-                    <CardTitle className="text-white text-lg">{project.title}</CardTitle>
+                    <CardTitle className="text-white text-lg group-hover:text-orange-500 transition-colors">{project.title}</CardTitle>
                     <CardDescription className="text-gray-400">{project.description}</CardDescription>
                   </CardHeader>
                 </Card>

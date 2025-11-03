@@ -157,15 +157,28 @@ const Home = () => {
           >
             {/* Large Logo Image */}
             <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
+              initial={{ scale: 0, opacity: 0, rotate: -180 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 100, delay: 0.2, duration: 1 }}
               className="mb-8"
+              whileHover={{ 
+                scale: 1.05,
+                rotate: [0, -5, 5, -5, 0],
+                transition: { duration: 0.5 }
+              }}
             >
-              <img 
+              <motion.img 
                 src="https://customer-assets.emergentagent.com/job_5dad80a5-5b92-47a9-9d97-b86aa98507ee/artifacts/2wtib7ez_Screenshot%202025-10-07%20201022.png" 
                 alt="TechyHive Logo" 
-                className="w-64 h-64 mx-auto object-contain"
+                className="w-64 h-64 mx-auto object-contain drop-shadow-2xl"
+                animate={{
+                  filter: [
+                    "drop-shadow(0 0 20px rgba(249, 115, 22, 0.3))",
+                    "drop-shadow(0 0 40px rgba(249, 115, 22, 0.5))",
+                    "drop-shadow(0 0 20px rgba(249, 115, 22, 0.3))"
+                  ]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
               />
             </motion.div>
 

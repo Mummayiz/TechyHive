@@ -256,30 +256,37 @@ def test_get_specific_contact(submission_id):
         print(f"❌ Get specific contact failed with error: {e}")
         return False
 
-def run_comprehensive_tests():
-    """Run all backend API tests"""
-    print("=" * 60)
-    print("🚀 STARTING TECHYHIVE BACKEND API TESTS")
-    print("=" * 60)
+def run_email_focused_tests():
+    """Run email-focused backend API tests"""
+    print("=" * 70)
+    print("📧 STARTING TECHYHIVE EMAIL FUNCTIONALITY TESTS")
+    print("=" * 70)
     
     test_results = []
     submission_id = None
+    email_errors = []
     
-    # Test 1: Health Check
+    # Test 1: Health Check (basic connectivity)
     health_result = test_health_check()
     test_results.append(("Health Check", health_result))
     
-    # Test 2: Contact Form Submission
-    contact_result, submission_id = test_contact_form_submission()
-    test_results.append(("Contact Form Submission", contact_result))
+    # Test 2: Contact Form Submission with Email
+    contact_result, submission_id = test_contact_form_submission_with_email()
+    test_results.append(("Contact Form Submission with Email", contact_result))
     
-    # Test 3: Get All Contacts
-    get_all_result = test_get_all_contacts()
-    test_results.append(("Get All Contacts", get_all_result))
-    
-    # Test 4: Get Specific Contact
-    get_specific_result = test_get_specific_contact(submission_id)
-    test_results.append(("Get Specific Contact", get_specific_result))
+    # Test 3: Check Backend Logs for Email Confirmation
+    if contact_result:
+        print("\n⏳ Waiting 3 seconds for email processing...")
+        import time
+        time.sleep(3)
+        
+        email_logs_result, errors = check_backend_logs_for_email_confirmation()
+        test_results.append(("Email Confirmation in Logs", email_logs_result))
+        email_errors.extend(errors)
+    else:
+        print("⚠️ Skipping email log check due to failed contact submission")
+        test_results.append(("Email Confirmation in Logs", False))
+        email_errors.append("Contact submission failed")
     
     # Summary
     print("\n" + "=" * 60)

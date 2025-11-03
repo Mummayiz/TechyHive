@@ -201,9 +201,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Email Notification System"
+    []
   stuck_tasks:
-    - "Email Notification System"
+    []
   test_all: false
   test_priority: "high_first"
 

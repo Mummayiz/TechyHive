@@ -199,8 +199,8 @@ metadata:
 test_plan:
   current_focus:
     - "Email Notification System"
-    - "Contact Form Submission API"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Email Notification System"
   test_all: false
   test_priority: "high_first"
 

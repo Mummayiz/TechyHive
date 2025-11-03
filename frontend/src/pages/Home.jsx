@@ -381,6 +381,83 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Tech Workspace Showcase Section */}
+      <section className="py-20 px-6 bg-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-yellow-500" />
+        </div>
+        <div className="container mx-auto max-w-6xl relative z-10">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                Professional <span className="text-orange-500">Development Environment</span>
+              </h2>
+              <p className="text-gray-300 text-lg mb-6">
+                We work with cutting-edge technologies and modern development practices to deliver exceptional results. Our team utilizes industry-standard tools and frameworks to ensure your projects meet the highest quality standards.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <motion.div 
+                  className="flex items-center gap-3 bg-slate-800/50 p-3 rounded-lg border border-orange-500/20"
+                  whileHover={{ x: 5, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                >
+                  <Code className="w-5 h-5 text-orange-500" />
+                  <span className="text-white text-sm">Clean Code</span>
+                </motion.div>
+                <motion.div 
+                  className="flex items-center gap-3 bg-slate-800/50 p-3 rounded-lg border border-orange-500/20"
+                  whileHover={{ x: 5, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                >
+                  <Terminal className="w-5 h-5 text-orange-500" />
+                  <span className="text-white text-sm">Latest Tech</span>
+                </motion.div>
+                <motion.div 
+                  className="flex items-center gap-3 bg-slate-800/50 p-3 rounded-lg border border-orange-500/20"
+                  whileHover={{ x: 5, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                >
+                  <Sparkles className="w-5 h-5 text-orange-500" />
+                  <span className="text-white text-sm">Best Practices</span>
+                </motion.div>
+                <motion.div 
+                  className="flex items-center gap-3 bg-slate-800/50 p-3 rounded-lg border border-orange-500/20"
+                  whileHover={{ x: 5, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                >
+                  <BookOpen className="w-5 h-5 text-orange-500" />
+                  <span className="text-white text-sm">Documentation</span>
+                </motion.div>
+              </div>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <motion.div 
+                className="rounded-2xl overflow-hidden border-4 border-orange-500/30 shadow-2xl shadow-orange-500/20"
+                whileHover={{ scale: 1.02, borderColor: "rgba(249, 115, 22, 0.6)" }}
+                transition={{ duration: 0.3 }}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1512686096451-a15c19314d59?w=1200&q=80" 
+                  alt="Professional workspace"
+                  className="w-full h-auto"
+                />
+              </motion.div>
+              <motion.div 
+                className="absolute -top-4 -right-4 w-24 h-24 bg-orange-500/30 rounded-full blur-2xl"
+                animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Portfolio Section */}
       <section id="portfolio" className="py-20 px-6 bg-slate-800/30">
         <div className="container mx-auto max-w-6xl">

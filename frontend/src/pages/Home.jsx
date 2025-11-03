@@ -744,8 +744,14 @@ const Home = () => {
                   <Mail className="w-4 h-4" />
                   techyhive03@gmail.com
                 </a>
-                <a href="https://instagram.com/techyhive" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-orange-500 text-sm transition-colors">
-                  @techyhive
+                <a 
+                  href="https://www.instagram.com/techyhive.in?igsh=MXFzbWk1OTQ1NDQ4cg==" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-2 text-gray-400 hover:text-orange-500 text-sm transition-colors group"
+                >
+                  <Instagram className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  @techyhive.in
                 </a>
               </div>
             </div>

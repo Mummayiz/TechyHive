@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Code, FileText, Terminal, BookOpen, Briefcase, Sparkles, Hexagon, Star, Send, Mail } from 'lucide-react';
+import { Code, FileText, Terminal, BookOpen, Briefcase, Sparkles, Hexagon, Star, Send, Mail, Instagram } from 'lucide-react';
 import { services, testimonials, projectTypes, domains } from '../mock';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';

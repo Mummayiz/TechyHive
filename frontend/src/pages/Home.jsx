@@ -97,6 +97,14 @@ const Home = () => {
               <a href="#portfolio" className="text-gray-300 hover:text-orange-500 transition-colors">Portfolio</a>
               <a href="#testimonials" className="text-gray-300 hover:text-orange-500 transition-colors">Testimonials</a>
               <a href="#contact" className="text-gray-300 hover:text-orange-500 transition-colors">Contact</a>
+              <a 
+                href="https://www.instagram.com/techyhive.in?igsh=MXFzbWk1OTQ1NDQ4cg==" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-orange-500 transition-colors"
+              >
+                <Instagram className="w-5 h-5" />
+              </a>
               <a href="#contact">
                 <Button className="bg-orange-500 hover:bg-orange-600 text-white">Get Started</Button>
               </a>

@@ -546,28 +546,63 @@ const Home = () => {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="relative z-10 bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl border border-orange-500/30 shadow-xl shadow-orange-500/10">
+              {/* Background Image */}
+              <motion.div 
+                className="absolute inset-0 rounded-2xl overflow-hidden"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1593720219128-218edc93bdc0?w=800&q=80" 
+                  alt="Coding workspace"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-orange-900/80" />
+              </motion.div>
+
+              <div className="relative z-10 p-8 rounded-2xl border border-orange-500/30 shadow-xl shadow-orange-500/10">
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="text-center p-4 bg-slate-700/30 rounded-lg">
+                  <motion.div 
+                    className="text-center p-4 bg-slate-700/30 backdrop-blur-sm rounded-lg border border-orange-500/20"
+                    whileHover={{ scale: 1.05, backgroundColor: "rgba(51, 65, 85, 0.5)" }}
+                  >
                     <div className="text-4xl font-bold text-orange-500 mb-2">500+</div>
                     <div className="text-gray-400 text-sm">Projects Delivered</div>
-                  </div>
-                  <div className="text-center p-4 bg-slate-700/30 rounded-lg">
+                  </motion.div>
+                  <motion.div 
+                    className="text-center p-4 bg-slate-700/30 backdrop-blur-sm rounded-lg border border-orange-500/20"
+                    whileHover={{ scale: 1.05, backgroundColor: "rgba(51, 65, 85, 0.5)" }}
+                  >
                     <div className="text-4xl font-bold text-orange-500 mb-2">98%</div>
                     <div className="text-gray-400 text-sm">Success Rate</div>
-                  </div>
-                  <div className="text-center p-4 bg-slate-700/30 rounded-lg">
+                  </motion.div>
+                  <motion.div 
+                    className="text-center p-4 bg-slate-700/30 backdrop-blur-sm rounded-lg border border-orange-500/20"
+                    whileHover={{ scale: 1.05, backgroundColor: "rgba(51, 65, 85, 0.5)" }}
+                  >
                     <div className="text-4xl font-bold text-orange-500 mb-2">24/7</div>
                     <div className="text-gray-400 text-sm">Support</div>
-                  </div>
-                  <div className="text-center p-4 bg-slate-700/30 rounded-lg">
+                  </motion.div>
+                  <motion.div 
+                    className="text-center p-4 bg-slate-700/30 backdrop-blur-sm rounded-lg border border-orange-500/20"
+                    whileHover={{ scale: 1.05, backgroundColor: "rgba(51, 65, 85, 0.5)" }}
+                  >
                     <div className="text-4xl font-bold text-orange-500 mb-2">100%</div>
                     <div className="text-gray-400 text-sm">Satisfaction</div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
-              <div className="absolute -top-4 -right-4 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-yellow-500/20 rounded-full blur-3xl"></div>
+              <motion.div 
+                className="absolute -top-4 -right-4 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              />
+              <motion.div 
+                className="absolute -bottom-4 -left-4 w-32 h-32 bg-yellow-500/20 rounded-full blur-3xl"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity, delay: 2 }}
+              />
             </motion.div>
           </div>
         </div>

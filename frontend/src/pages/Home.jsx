@@ -236,6 +236,16 @@ const Home = () => {
                   <Send className="ml-2 w-5 h-5" />
                 </Button>
               </a>
+              <a 
+                href="https://www.instagram.com/techyhive.in?igsh=MXFzbWk1OTQ1NDQ4cg==" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button size="lg" variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white px-8 py-6 text-lg group">
+                  <Instagram className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+                  Follow Us
+                </Button>
+              </a>
               <a href="#portfolio">
                 <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg">
                   View Our Work

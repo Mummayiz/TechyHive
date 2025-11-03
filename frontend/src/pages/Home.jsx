@@ -306,13 +306,18 @@ const Home = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05, y: -5 }}
                 >
                   <Card className="bg-slate-800/50 border-slate-700 hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20 h-full group">
                     <CardHeader>
-                      <div className="w-14 h-14 rounded-lg bg-orange-500/10 flex items-center justify-center mb-4 group-hover:bg-orange-500/20 transition-colors">
+                      <motion.div 
+                        className="w-14 h-14 rounded-lg bg-orange-500/10 flex items-center justify-center mb-4 group-hover:bg-orange-500/20 transition-colors"
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.5 }}
+                      >
                         <Icon className="w-7 h-7 text-orange-500" />
-                      </div>
-                      <CardTitle className="text-white text-xl">{service.title}</CardTitle>
+                      </motion.div>
+                      <CardTitle className="text-white text-xl group-hover:text-orange-500 transition-colors">{service.title}</CardTitle>
                       <CardDescription className="text-gray-400">{service.description}</CardDescription>
                     </CardHeader>
                   </Card>

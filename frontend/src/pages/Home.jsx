@@ -745,14 +745,31 @@ const Home = () => {
       </section>
 
       {/* Contact Form Section */}
-      <section id="contact" className="py-20 px-6 bg-slate-800/30">
-        <div className="container mx-auto max-w-4xl">
+      <section id="contact" className="py-20 px-6 bg-slate-800/30 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <img 
+            src="https://images.unsplash.com/photo-1596784326488-23581279e33d?w=1920&q=80" 
+            alt="Background"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-800/50 to-slate-900/80" />
+        
+        <div className="container mx-auto max-w-4xl relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-12"
           >
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="inline-block mb-4"
+            >
+              <Send className="w-16 h-16 text-orange-500" />
+            </motion.div>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Get <span className="text-orange-500">Started</span>
             </h2>

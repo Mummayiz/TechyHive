@@ -174,17 +174,17 @@ def check_backend_logs_for_email_confirmation():
             else:
                 print("❌ No user confirmation email status found in logs")
             
-            # Check for specific email errors
+            # Check for specific email errors in recent logs only
             email_errors = []
-            if "530, '5.7.0 Authentication Required" in log_content:
+            if "530, '5.7.0 Authentication Required" in recent_content:
                 print("🔍 Found Gmail authentication error - SMTP credentials issue")
                 email_errors.append("Gmail SMTP authentication failed")
             
-            if "Error sending emails:" in log_content:
+            if "Error sending emails:" in recent_content:
                 print("⚠️ Found general email sending errors in logs")
                 email_errors.append("General email sending error found")
             
-            if "Failed to send email" in log_content:
+            if "Failed to send email" in recent_content:
                 print("⚠️ Found specific email failure messages in logs")
                 email_errors.append("Specific email failures found")
             

@@ -36,20 +36,20 @@ def test_health_check():
         print(f"❌ Health check failed with error: {e}")
         return False
 
-def test_contact_form_submission():
-    """Test contact form submission with comprehensive data"""
-    print("\n🔍 Testing Contact Form Submission...")
+def test_contact_form_submission_with_email():
+    """Test contact form submission with email functionality"""
+    print("\n🔍 Testing Contact Form Submission with Email Functionality...")
     
     # Test data as specified in the review request
     test_data = {
-        "name": "John Doe",
-        "email": "john@example.com", 
-        "phone": "9876543210",
-        "project_type": "AI/ML Project",
-        "domain": "Machine Learning",
-        "deadline": "2025-09-01",
-        "budget": "10000-20000",
-        "description": "Need an AI-powered recommendation system for e-commerce"
+        "name": "Test User",
+        "email": "test-email@example.com",
+        "phone": "+1234567890",
+        "project_type": "Web Development",
+        "domain": "E-commerce",
+        "deadline": "2 months",
+        "budget": "$5000-$10000",
+        "description": "Testing the new email notification system"
     }
     
     try:

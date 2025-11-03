@@ -126,6 +126,65 @@ def test_contact_form_submission_with_email():
         print(f"❌ Contact form submission failed with error: {e}")
         return False, None
 
+def check_backend_logs_for_email_confirmation():
+    """Check backend logs for email sending confirmation messages"""
+    print("\n🔍 Checking Backend Logs for Email Confirmation...")
+    
+    try:
+        import subprocess
+        
+        # Check supervisor backend logs for email confirmation messages
+        result = subprocess.run(
+            ["tail", "-n", "50", "/var/log/supervisor/backend.out.log"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            log_content = result.stdout
+            print("📋 Recent backend logs:")
+            print("-" * 40)
+            print(log_content[-1000:])  # Show last 1000 characters
+            print("-" * 40)
+            
+            # Check for email confirmation messages
+            admin_email_sent = "Admin notification sent to techyhive03@gmail.com" in log_content
+            user_email_sent = "Confirmation email sent to" in log_content
+            
+            if admin_email_sent:
+                print("✅ Found admin notification email confirmation in logs")
+            else:
+                print("❌ Admin notification email confirmation NOT found in logs")
+            
+            if user_email_sent:
+                print("✅ Found user confirmation email confirmation in logs")
+            else:
+                print("❌ User confirmation email confirmation NOT found in logs")
+            
+            # Check for any email errors
+            email_errors = []
+            if "Error sending emails:" in log_content:
+                print("⚠️ Found email sending errors in logs")
+                email_errors.append("Email sending error found")
+            
+            if "Failed to send email" in log_content:
+                print("⚠️ Found email failure messages in logs")
+                email_errors.append("Email failure found")
+            
+            return admin_email_sent and user_email_sent, email_errors
+            
+        else:
+            print(f"❌ Failed to read backend logs: {result.stderr}")
+            return False, ["Could not read backend logs"]
+            
+    except subprocess.TimeoutExpired:
+        print("❌ Timeout while reading backend logs")
+        return False, ["Timeout reading logs"]
+    except Exception as e:
+        print(f"❌ Error checking backend logs: {e}")
+        return False, [f"Error: {e}"]
+
 def test_get_all_contacts():
     """Test retrieving all contact submissions"""
     print("\n🔍 Testing Get All Contact Submissions...")

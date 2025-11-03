@@ -135,7 +135,7 @@ def check_backend_logs_for_email_confirmation():
         
         # Check supervisor backend logs for email confirmation messages
         result = subprocess.run(
-            ["tail", "-n", "50", "/var/log/supervisor/backend.out.log"],
+            ["tail", "-n", "50", "/var/log/supervisor/backend.err.log"],
             capture_output=True,
             text=True,
             timeout=10

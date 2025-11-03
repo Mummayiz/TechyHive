@@ -260,22 +260,36 @@ const Home = () => {
               transition={{ delay: 0.8 }}
               className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
             >
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">500+</div>
-                <div className="text-sm text-gray-400">Projects Completed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">50+</div>
-                <div className="text-sm text-gray-400">Happy Clients</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">5</div>
-                <div className="text-sm text-gray-400">Years Experience</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">24/7</div>
-                <div className="text-sm text-gray-400">Support Available</div>
-              </div>
+              {[
+                { value: "500+", label: "Projects Completed", delay: 0.9 },
+                { value: "50+", label: "Happy Clients", delay: 1.0 },
+                { value: "5", label: "Years Experience", delay: 1.1 },
+                { value: "24/7", label: "Support Available", delay: 1.2 }
+              ].map((stat, idx) => (
+                <motion.div 
+                  key={idx}
+                  className="text-center"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: stat.delay, type: "spring", stiffness: 200 }}
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <motion.div 
+                    className="text-4xl md:text-5xl font-bold text-orange-500 mb-2"
+                    animate={{ 
+                      textShadow: [
+                        "0 0 4px rgba(249, 115, 22, 0.5)",
+                        "0 0 8px rgba(249, 115, 22, 0.8)",
+                        "0 0 4px rgba(249, 115, 22, 0.5)"
+                      ]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    {stat.value}
+                  </motion.div>
+                  <div className="text-sm text-gray-400">{stat.label}</div>
+                </motion.div>
+              ))}
             </motion.div>
           </motion.div>
         </div>

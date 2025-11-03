@@ -53,6 +53,9 @@ def test_contact_form_submission_with_email():
     }
     
     try:
+        print(f"📧 Submitting contact form with email: {test_data['email']}")
+        print(f"📧 Expected admin notification to: techyhive03@gmail.com")
+        
         response = requests.post(
             f"{BACKEND_URL}/contact",
             json=test_data,
@@ -106,11 +109,17 @@ def test_contact_form_submission_with_email():
                 print(f"❌ Status should be 'pending', got '{data['status']}'")
                 return False, None
             
-            print("✅ Contact form submission passed all validations")
+            print("✅ Contact form submission API response validated successfully")
+            print("📧 Email functionality will be verified through backend logs")
             return True, data["id"]
             
         else:
             print(f"❌ Contact form submission failed - status code {response.status_code}")
+            try:
+                error_detail = response.json()
+                print(f"Error details: {error_detail}")
+            except:
+                print(f"Response text: {response.text}")
             return False, None
             
     except Exception as e:

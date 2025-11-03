@@ -40,7 +40,7 @@ const Home = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.projectType || !formData.description) {
@@ -48,22 +48,48 @@ const Home = () => {
       return;
     }
 
-    const submissions = JSON.parse(localStorage.getItem('techyhive_submissions') || '[]');
-    submissions.push({ ...formData, id: Date.now(), timestamp: new Date().toISOString() });
-    localStorage.setItem('techyhive_submissions', JSON.stringify(submissions));
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      const response = await fetch(`${backendUrl}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          project_type: formData.projectType,
+          domain: formData.domain,
+          deadline: formData.deadline,
+          budget: formData.budget,
+          description: formData.description
+        }),
+      });
 
-    toast.success('✅ Your request is submitted, and the team will get back to you within 24 hours.');
-    
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      projectType: '',
-      domain: '',
-      deadline: '',
-      budget: '',
-      description: ''
-    });
+      if (!response.ok) {
+        throw new Error('Failed to submit form');
+      }
+
+      const data = await response.json();
+      console.log('Submission successful:', data);
+      
+      toast.success('✅ Your request is submitted, and the team will get back to you within 24 hours.');
+      
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        projectType: '',
+        domain: '',
+        deadline: '',
+        budget: '',
+        description: ''
+      });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to submit request. Please try again.');
+    }
   };
 
   return (

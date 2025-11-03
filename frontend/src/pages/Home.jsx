@@ -744,6 +744,88 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Process/Technology Showcase */}
+      <section className="py-20 px-6 bg-slate-900">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Our <span className="text-orange-500">Technologies</span>
+            </h2>
+            <p className="text-gray-400 text-lg">We use modern tools and frameworks to build your projects</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                title: "AI & Machine Learning",
+                description: "Advanced AI solutions with TensorFlow, PyTorch, and modern ML frameworks",
+                image: "https://images.unsplash.com/photo-1717501220374-9f4b2a3a60c9?w=600&q=80",
+                icon: Sparkles
+              },
+              {
+                title: "Web Development",
+                description: "Full-stack development with React, Node.js, Python, and modern frameworks",
+                image: "https://images.unsplash.com/photo-1593720219128-218edc93bdc0?w=600&q=80",
+                icon: Code
+              },
+              {
+                title: "Mobile & IoT",
+                description: "Mobile apps and IoT solutions with cutting-edge technology stack",
+                image: "https://images.unsplash.com/photo-1657972170499-3376d9eb8f65?w=600&q=80",
+                icon: Terminal
+              }
+            ].map((tech, index) => {
+              const Icon = tech.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10 }}
+                >
+                  <Card className="bg-slate-800/50 border-slate-700 hover:border-orange-500/50 transition-all duration-300 h-full overflow-hidden group">
+                    <div className="h-48 relative overflow-hidden">
+                      <motion.img 
+                        src={tech.image}
+                        alt={tech.title}
+                        className="w-full h-full object-cover"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent" />
+                      <div className="absolute bottom-4 left-4">
+                        <motion.div 
+                          className="w-12 h-12 rounded-lg bg-orange-500/20 backdrop-blur-sm border border-orange-500/40 flex items-center justify-center"
+                          whileHover={{ rotate: 360, scale: 1.2 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <Icon className="w-6 h-6 text-orange-500" />
+                        </motion.div>
+                      </div>
+                    </div>
+                    <CardHeader>
+                      <CardTitle className="text-white text-lg group-hover:text-orange-500 transition-colors">
+                        {tech.title}
+                      </CardTitle>
+                      <CardDescription className="text-gray-400">
+                        {tech.description}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Contact Form Section */}
       <section id="contact" className="py-20 px-6 bg-slate-800/30 relative overflow-hidden">
         {/* Background Pattern */}

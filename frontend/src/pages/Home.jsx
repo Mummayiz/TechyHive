@@ -782,7 +782,7 @@ const Home = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-slate-800/70 backdrop-blur-sm border-slate-700 shadow-2xl shadow-orange-500/10">
               <CardContent className="pt-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">

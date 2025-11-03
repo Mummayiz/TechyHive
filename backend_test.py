@@ -289,9 +289,9 @@ def run_email_focused_tests():
         email_errors.append("Contact submission failed")
     
     # Summary
-    print("\n" + "=" * 60)
-    print("📊 TEST RESULTS SUMMARY")
-    print("=" * 60)
+    print("\n" + "=" * 70)
+    print("📊 EMAIL FUNCTIONALITY TEST RESULTS")
+    print("=" * 70)
     
     passed = 0
     failed = 0
@@ -308,11 +308,26 @@ def run_email_focused_tests():
     print(f"Passed: {passed}")
     print(f"Failed: {failed}")
     
+    # Show email errors if any
+    if email_errors:
+        print(f"\n⚠️ EMAIL ISSUES DETECTED:")
+        for error in email_errors:
+            print(f"  • {error}")
+    
+    # Email-specific summary
+    email_working = any("Email Confirmation" in name and result for name, result in test_results)
+    api_working = any("Contact Form Submission" in name and result for name, result in test_results)
+    
+    print(f"\n📧 EMAIL FUNCTIONALITY STATUS:")
+    print(f"  • API Response: {'✅ Working' if api_working else '❌ Failed'}")
+    print(f"  • Email Sending: {'✅ Working' if email_working else '❌ Failed'}")
+    
     if failed == 0:
-        print("\n🎉 ALL TESTS PASSED! Backend API is working correctly.")
+        print("\n🎉 ALL EMAIL TESTS PASSED! Email functionality is working correctly.")
+        print("📧 Both admin notification and user confirmation emails should be sent.")
         return True
     else:
-        print(f"\n⚠️ {failed} TEST(S) FAILED. Please check the issues above.")
+        print(f"\n⚠️ {failed} TEST(S) FAILED. Email functionality needs attention.")
         return False
 
 if __name__ == "__main__":

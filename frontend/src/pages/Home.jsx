@@ -188,40 +188,40 @@ const Home = () => {
               transition={{ delay: 0.4 }}
               className="flex flex-wrap justify-center gap-6 mb-10"
             >
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
-                  <Code className="w-8 h-8 text-orange-500" />
-                </div>
-                <span className="text-sm text-gray-400">CS Projects</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
-                  <Sparkles className="w-8 h-8 text-orange-500" />
-                </div>
-                <span className="text-sm text-gray-400">AI/ML</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
-                  <Terminal className="w-8 h-8 text-orange-500" />
-                </div>
-                <span className="text-sm text-gray-400">Data Science</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
-                  <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-400">IoT</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all">
-                  <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-400">Electronics</span>
-              </div>
+              {[
+                { icon: Code, label: "CS Projects" },
+                { icon: Sparkles, label: "AI/ML" },
+                { icon: Terminal, label: "Data Science" },
+                { icon: null, label: "IoT", svg: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" /> },
+                { icon: null, label: "Electronics", svg: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /> }
+              ].map((item, idx) => {
+                const IconComponent = item.icon;
+                return (
+                  <motion.div 
+                    key={idx}
+                    className="flex flex-col items-center"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + idx * 0.1, type: "spring", stiffness: 200 }}
+                    whileHover={{ scale: 1.1, y: -5 }}
+                  >
+                    <motion.div 
+                      className="w-16 h-16 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-2 hover:bg-orange-500/20 transition-all cursor-pointer"
+                      whileHover={{ rotate: [0, -10, 10, -10, 0], borderColor: "rgba(249, 115, 22, 0.6)" }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {IconComponent ? (
+                        <IconComponent className="w-8 h-8 text-orange-500" />
+                      ) : (
+                        <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          {item.svg}
+                        </svg>
+                      )}
+                    </motion.div>
+                    <span className="text-sm text-gray-400">{item.label}</span>
+                  </motion.div>
+                );
+              })}
             </motion.div>
 
             <motion.div 

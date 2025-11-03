@@ -42,14 +42,14 @@ def test_contact_form_submission_with_email():
     
     # Test data as specified in the review request
     test_data = {
-        "name": "Test User",
-        "email": "test-email@example.com",
+        "name": "John Smith",
+        "email": "test@example.com",
         "phone": "+1234567890",
         "project_type": "Web Development",
         "domain": "E-commerce",
         "deadline": "2 months",
         "budget": "$5000-$10000",
-        "description": "Testing the new email notification system"
+        "description": "Need a modern e-commerce website with payment integration"
     }
     
     try:

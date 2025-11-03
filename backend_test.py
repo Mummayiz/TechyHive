@@ -11,7 +11,7 @@ from datetime import datetime
 import sys
 
 # Get the backend URL from frontend .env
-BACKEND_URL = "https://clean-attribution-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://message-sender-16.preview.emergentagent.com/api"
 
 def test_health_check():
     """Test the basic health check endpoint"""

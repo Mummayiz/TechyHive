@@ -543,14 +543,27 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -10, scale: 1.02 }}
               >
-                <Card className="bg-slate-800/50 border-slate-700 h-full">
+                <Card className="bg-slate-800/50 border-slate-700 hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 h-full">
                   <CardHeader>
-                    <div className="flex gap-1 mb-3">
+                    <motion.div 
+                      className="flex gap-1 mb-3"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ delay: index * 0.1 + 0.2 }}
+                    >
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-orange-500 text-orange-500" />
+                        <motion.div
+                          key={i}
+                          initial={{ scale: 0, rotate: -180 }}
+                          whileInView={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: index * 0.1 + 0.3 + i * 0.05, type: "spring" }}
+                        >
+                          <Star className="w-4 h-4 fill-orange-500 text-orange-500" />
+                        </motion.div>
                       ))}
-                    </div>
+                    </motion.div>
                     <CardDescription className="text-gray-300 text-base mb-4">
                       "{testimonial.content}"
                     </CardDescription>

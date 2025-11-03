@@ -148,13 +148,17 @@ def check_backend_logs_for_email_confirmation():
             print(log_content[-1000:])  # Show last 1000 characters
             print("-" * 40)
             
-            # Check for email confirmation messages
-            admin_email_sent = "Admin notification sent to techyhive03@gmail.com" in log_content
-            user_email_sent = "Confirmation email sent to" in log_content
+            # Get the most recent log entries (last 10 lines) to avoid old errors
+            recent_lines = log_content.strip().split('\n')[-10:]
+            recent_content = '\n'.join(recent_lines)
             
-            # Check for email failure messages
-            admin_email_failed = "Failed to send admin notification to techyhive03@gmail.com" in log_content
-            user_email_failed = "Failed to send confirmation email to" in log_content
+            # Check for email confirmation messages in recent logs
+            admin_email_sent = "Admin notification sent to techyhive03@gmail.com" in recent_content
+            user_email_sent = "Confirmation email sent to" in recent_content
+            
+            # Check for email failure messages in recent logs
+            admin_email_failed = "Failed to send admin notification to techyhive03@gmail.com" in recent_content
+            user_email_failed = "Failed to send confirmation email to" in recent_content
             
             if admin_email_sent:
                 print("✅ Found admin notification email confirmation in logs")

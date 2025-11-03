@@ -184,7 +184,9 @@ def check_backend_logs_for_email_confirmation():
                 print("⚠️ Found specific email failure messages in logs")
                 email_errors.append("Specific email failures found")
             
-            return admin_email_sent and user_email_sent, email_errors
+            # Email is working if we see success messages, not working if we see failure messages
+            email_working = (admin_email_sent and user_email_sent) and not (admin_email_failed or user_email_failed)
+            return email_working, email_errors
             
         else:
             print(f"❌ Failed to read backend logs: {result.stderr}")

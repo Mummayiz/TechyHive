@@ -152,25 +152,37 @@ def check_backend_logs_for_email_confirmation():
             admin_email_sent = "Admin notification sent to techyhive03@gmail.com" in log_content
             user_email_sent = "Confirmation email sent to" in log_content
             
+            # Check for email failure messages
+            admin_email_failed = "Failed to send admin notification to techyhive03@gmail.com" in log_content
+            user_email_failed = "Failed to send confirmation email to" in log_content
+            
             if admin_email_sent:
                 print("✅ Found admin notification email confirmation in logs")
+            elif admin_email_failed:
+                print("❌ Admin notification email FAILED - found failure message in logs")
             else:
-                print("❌ Admin notification email confirmation NOT found in logs")
+                print("❌ No admin notification email status found in logs")
             
             if user_email_sent:
                 print("✅ Found user confirmation email confirmation in logs")
+            elif user_email_failed:
+                print("❌ User confirmation email FAILED - found failure message in logs")
             else:
-                print("❌ User confirmation email confirmation NOT found in logs")
+                print("❌ No user confirmation email status found in logs")
             
-            # Check for any email errors
+            # Check for specific email errors
             email_errors = []
+            if "530, '5.7.0 Authentication Required" in log_content:
+                print("🔍 Found Gmail authentication error - SMTP credentials issue")
+                email_errors.append("Gmail SMTP authentication failed")
+            
             if "Error sending emails:" in log_content:
-                print("⚠️ Found email sending errors in logs")
-                email_errors.append("Email sending error found")
+                print("⚠️ Found general email sending errors in logs")
+                email_errors.append("General email sending error found")
             
             if "Failed to send email" in log_content:
-                print("⚠️ Found email failure messages in logs")
-                email_errors.append("Email failure found")
+                print("⚠️ Found specific email failure messages in logs")
+                email_errors.append("Specific email failures found")
             
             return admin_email_sent and user_email_sent, email_errors
             

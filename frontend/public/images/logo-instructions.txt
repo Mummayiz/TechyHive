@@ -1,0 +1,10 @@
+Save the TechyHive logo image as:
+- logo.png or logo.jpg
+
+The logo file should be saved in this directory:
+C:\Users\Lenovo\Desktop\TechyHive\frontend\public\images\
+
+The logo will be used for:
+1. SEO meta tags (Open Graph, Twitter Cards)
+2. Favicon
+3. Loading screen

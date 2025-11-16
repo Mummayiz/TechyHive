@@ -6,13 +6,28 @@ body {
   margin: 0;
   padding: 0;
   scroll-behavior: smooth;
+  border: none !important;
+  outline: none !important;
+}
+
+body::after,
+body::before,
+html::after,
+html::before {
+  display: none !important;
 }
 
 .App {
   min-height: 100vh;
+  border: none !important;
 }
 
-/* Custom scrollbar */
+#root {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Custom scrollbar - Removed to eliminate bottom line */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -22,12 +37,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #f97316;
+  background: #64748b;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ea580c;
+  background: #475569;
 }
 
 /* Smooth transitions for buttons */

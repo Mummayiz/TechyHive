@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, BackgroundTasks
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,15 +9,30 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
 from datetime import datetime, timezone
+import asyncio
+
+# Configure logging FIRST
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 from email_service import email_service
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# MongoDB connection with error handling
+try:
+    mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+    client = AsyncIOMotorClient(mongo_url, serverSelectionTimeoutMS=500)  # Reduced to 500ms
+    db = client[os.environ.get('DB_NAME', 'techyhive')]
+    logger.info(f"MongoDB connection configured for: {mongo_url}")
+except Exception as e:
+    logger.error(f"MongoDB connection error: {e}")
+    client = None
+    db = None
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -91,49 +106,80 @@ async def get_status_checks():
     
     return status_checks
 
-# Contact Form Endpoints
-@api_router.post("/contact", response_model=ContactSubmission)
-async def create_contact_submission(input: ContactSubmissionCreate):
-    contact_dict = input.model_dump()
-    contact_obj = ContactSubmission(**contact_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = contact_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.contact_submissions.insert_one(doc)
-    logger.info(f"New contact submission from {contact_obj.name} ({contact_obj.email})")
-    
-    # Send emails (admin notification and user confirmation)
+# Background task for sending emails
+async def send_contact_emails(contact_dict: dict, contact_email: str, contact_name: str):
+    """Send emails in the background without blocking the response"""
     try:
-        # Send admin notification
         admin_email = os.environ.get('SMTP_USER')
-        admin_html = email_service.get_admin_notification_template(contact_dict)
-        admin_success = await email_service.send_email(
-            to_email=admin_email,
-            subject=f"🔔 New Contact Form Submission from {contact_obj.name}",
-            html_content=admin_html
-        )
-        if admin_success:
-            logger.info(f"Admin notification sent to {admin_email}")
-        else:
-            logger.error(f"Failed to send admin notification to {admin_email}")
         
-        # Send user confirmation
-        user_html = email_service.get_user_confirmation_template(contact_obj.name)
-        user_success = await email_service.send_email(
-            to_email=contact_obj.email,
+        # Prepare email tasks
+        email_tasks = []
+        
+        # Admin notification task
+        if admin_email:
+            admin_html = email_service.get_admin_notification_template(contact_dict)
+            admin_task = email_service.send_email(
+                to_email=admin_email,
+                subject=f"🔔 New Contact Form Submission from {contact_name}",
+                html_content=admin_html
+            )
+            email_tasks.append(('admin', admin_email, admin_task))
+        
+        # User confirmation task
+        user_html = email_service.get_user_confirmation_template(contact_name)
+        user_task = email_service.send_email(
+            to_email=contact_email,
             subject="✅ We've Received Your Request - TechyHive",
             html_content=user_html
         )
-        if user_success:
-            logger.info(f"Confirmation email sent to {contact_obj.email}")
-        else:
-            logger.error(f"Failed to send confirmation email to {contact_obj.email}")
+        email_tasks.append(('user', contact_email, user_task))
+        
+        # Send all emails in parallel
+        if email_tasks:
+            results = await asyncio.gather(*[task for _, _, task in email_tasks], return_exceptions=True)
+            
+            # Log results
+            for (email_type, recipient, _), result in zip(email_tasks, results):
+                if isinstance(result, Exception):
+                    logger.error(f"Failed to send {email_type} email to {recipient}: {str(result)}")
+                elif result:
+                    logger.info(f"{email_type.capitalize()} email sent to {recipient}")
+                else:
+                    logger.error(f"Failed to send {email_type} email to {recipient}")
     except Exception as e:
         logger.error(f"Error sending emails: {str(e)}")
-        # Don't fail the request if email fails, just log it
+
+# Contact Form Endpoints
+@api_router.post("/contact", response_model=ContactSubmission)
+async def create_contact_submission(input: ContactSubmissionCreate, background_tasks: BackgroundTasks):
+    contact_dict = input.model_dump()
+    contact_obj = ContactSubmission(**contact_dict)
     
+    logger.info(f"New contact submission from {contact_obj.name} ({contact_obj.email})")
+    
+    # Save to MongoDB if available (non-blocking)
+    if db is not None:
+        try:
+            doc = contact_obj.model_dump()
+            doc['timestamp'] = doc['timestamp'].isoformat()
+            _ = await db.contact_submissions.insert_one(doc)
+            logger.info("Contact submission saved to MongoDB")
+        except Exception as e:
+            logger.error(f"MongoDB save error: {e}")
+    else:
+        logger.warning("MongoDB not available, skipping database save")
+    
+    # Schedule emails to be sent in the background
+    background_tasks.add_task(
+        send_contact_emails,
+        contact_dict,
+        contact_obj.email,
+        contact_obj.name
+    )
+    
+    logger.info("Emails scheduled for background sending")
+    
+    # Return immediately without waiting for emails
     return contact_obj
 
 @api_router.get("/contact", response_model=List[ContactSubmission])
@@ -157,9 +203,7 @@ async def get_contact_submission(submission_id: str):
         return submission
     return {"error": "Submission not found"}
 
-# Include the router in the main app
-app.include_router(api_router)
-
+# Add CORS middleware BEFORE including routes
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -168,13 +212,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Include the router in the main app
+app.include_router(api_router)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if client is not None:
+        client.close()
+        logger.info("MongoDB connection closed")

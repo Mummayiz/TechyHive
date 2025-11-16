@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Code, FileText, Terminal, BookOpen, Briefcase, Sparkles, Hexagon, Star, Send, Mail, Instagram } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { Code, FileText, Terminal, BookOpen, Briefcase, Sparkles, Hexagon, Star, Send, Mail, Instagram, Menu, X, Loader2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TypeAnimation } from 'react-type-animation';
 import { services, testimonials, projectTypes, domains } from '../mock';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -9,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { TechyHiveLogo } from '../components/animations';
+import ScrollToTop from '../components/ScrollToTop';
+import SEO from '../components/SEO';
 
 const iconMap = {
   Code,
@@ -31,25 +35,113 @@ const Home = () => {
     description: ''
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+  // Auto-play testimonials carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTestimonial((prev) => {
+        const maxIndex = testimonials.length - 3;
+        return prev >= maxIndex ? 0 : prev + 3;
+      });
+    }, 5000); // Change every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const nextTestimonial = () => {
+    setCurrentTestimonial((prev) => {
+      const maxIndex = testimonials.length - 3;
+      return prev >= maxIndex ? 0 : prev + 3;
+    });
+  };
+
+  const prevTestimonial = () => {
+    setCurrentTestimonial((prev) => {
+      const maxIndex = testimonials.length - 3;
+      return prev <= 0 ? maxIndex : prev - 3;
+    });
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleSelectChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user selects
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  // Email validation function
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Phone validation function
+  const isValidPhone = (phone) => {
+    if (!phone) return true; // Phone is optional
+    const phoneRegex = /^[0-9]{10,15}$/;
+    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+  };
+
+  // Validate form
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!formData.name.trim()) {
+      errors.name = 'Name is required';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!isValidEmail(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    if (formData.phone && !isValidPhone(formData.phone)) {
+      errors.phone = 'Please enter a valid phone number (10-15 digits)';
+    }
+    
+    if (!formData.projectType) {
+      errors.projectType = 'Please select a project type';
+    }
+    
+    if (!formData.description.trim()) {
+      errors.description = 'Project description is required';
+    } else if (formData.description.trim().length < 10) {
+      errors.description = 'Description must be at least 10 characters';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.projectType || !formData.description) {
-      toast.error('Please fill in all required fields');
+    // Validate form before submission
+    if (!validateForm()) {
+      toast.error('Please fix the errors in the form');
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+      console.log('Submitting to:', `${backendUrl}/api/contact`);
       const response = await fetch(`${backendUrl}/api/contact`, {
         method: 'POST',
         headers: {
@@ -67,14 +159,20 @@ const Home = () => {
         }),
       });
 
+      console.log('Response status:', response.status);
       if (!response.ok) {
-        throw new Error('Failed to submit form');
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`Failed to submit form: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
       console.log('Submission successful:', data);
       
-      toast.success('✅ Your request is submitted, and the team will get back to you within 24 hours.');
+      toast.success('✅ Your request is submitted, and the team will get back to you within 24 hours.', {
+        icon: <CheckCircle2 className="w-5 h-5" />,
+        duration: 5000,
+      });
       
       setFormData({
         name: '',
@@ -88,31 +186,142 @@ const Home = () => {
       });
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Failed to submit request. Please try again.');
+      toast.error('Failed to submit request. Please try again.', {
+        duration: 4000,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // Reusable animated section component
+  const AnimatedSection = ({ children, className = "" }) => {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+    return (
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 50 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    );
+  };
+
+  // Animated counter component
+  const AnimatedCounter = ({ end, duration = 2, suffix = "" }) => {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true });
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+      if (!isInView) return;
+      
+      let startTime;
+      const startValue = 0;
+      const endValue = parseInt(end);
+      
+      const animate = (currentTime) => {
+        if (!startTime) startTime = currentTime;
+        const progress = (currentTime - startTime) / (duration * 1000);
+        
+        if (progress < 1) {
+          setCount(Math.floor(startValue + (endValue - startValue) * progress));
+          requestAnimationFrame(animate);
+        } else {
+          setCount(endValue);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+    }, [isInView, end, duration]);
+
+    return <span ref={ref}>{count}{suffix}</span>;
+  };
+
+  // Animated section divider
+  const SectionDivider = () => (
+    <div className="flex items-center justify-center py-8">
+      <motion.div
+        initial={{ width: 0 }}
+        whileInView={{ width: "100%" }}
+        viewport={{ once: true }}
+        transition={{ duration: 1, ease: "easeInOut" }}
+        className="max-w-md mx-auto"
+      >
+        <div className="flex items-center gap-2">
+          <motion.div 
+            className="h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent flex-1"
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          >
+            <Hexagon className="w-6 h-6 text-orange-500" />
+          </motion.div>
+          <motion.div 
+            className="h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent flex-1"
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+          />
+        </div>
+      </motion.div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+    <>
+      <SEO />
+      <ScrollToTop />
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900" style={{ border: 'none', outline: 'none' }}>
       {/* Header */}
-      <header className="fixed top-0 w-full backdrop-blur-lg bg-slate-900/80 border-b border-orange-500/20 z-50">
+      <header className="fixed top-0 w-full backdrop-blur-lg bg-slate-900/80 border-b border-orange-500/20 z-50" id="home">
         <nav className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-3"
+              className="inline-flex items-center gap-3 cursor-pointer select-none"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
             >
-              <div className="relative">
-                <Hexagon className="w-10 h-10 text-orange-500 fill-orange-500/20" />
-                <Code className="w-5 h-5 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              </div>
-              <span className="text-2xl font-bold">
+              {/* Logo with animation */}
+              <motion.div
+                className="relative flex items-center justify-center"
+                style={{ width: 80, height: 80 }}
+                whileHover={{
+                  filter: 'drop-shadow(0 0 20px rgba(255, 140, 0, 0.6))'
+                }}
+                animate={{
+                  filter: 'drop-shadow(0 0 8px rgba(255, 140, 0, 0.3))'
+                }}
+                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <img 
+                  src="/images/logo.png" 
+                  alt="TechyHive Logo" 
+                  className="w-20 h-20 object-contain"
+                />
+              </motion.div>
+              
+              {/* Brand text */}
+              <motion.span 
+                className="text-xl font-bold"
+                whileHover={{ color: '#ff8c00' }}
+                transition={{ duration: 0.3 }}
+              >
                 <span className="text-orange-500">Techy</span>
                 <span className="text-white">Hive</span>
-              </span>
+              </motion.span>
             </motion.div>
             
+            {/* Desktop Navigation */}
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -135,8 +344,84 @@ const Home = () => {
                 <Button className="bg-orange-500 hover:bg-orange-600 text-white">Get Started</Button>
               </a>
             </motion.div>
+
+            {/* Mobile Menu Button */}
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden text-white p-2 hover:text-orange-500 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </motion.button>
           </div>
         </nav>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden border-t border-orange-500/20 bg-slate-900/95 backdrop-blur-lg"
+            >
+              <div className="container mx-auto px-6 py-4 flex flex-col gap-4">
+                <a 
+                  href="#home" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-300 hover:text-orange-500 transition-colors py-2"
+                >
+                  Home
+                </a>
+                <a 
+                  href="#services" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-300 hover:text-orange-500 transition-colors py-2"
+                >
+                  Services
+                </a>
+                <a 
+                  href="#portfolio" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-300 hover:text-orange-500 transition-colors py-2"
+                >
+                  Portfolio
+                </a>
+                <a 
+                  href="#testimonials" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-300 hover:text-orange-500 transition-colors py-2"
+                >
+                  Testimonials
+                </a>
+                <a 
+                  href="#contact" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-300 hover:text-orange-500 transition-colors py-2"
+                >
+                  Contact
+                </a>
+                <a 
+                  href="https://www.instagram.com/techyhive.in?igsh=MXFzbWk1OTQ1NDQ4cg==" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-orange-500 transition-colors py-2 flex items-center gap-2"
+                >
+                  <Instagram className="w-5 h-5" />
+                  Instagram
+                </a>
+                <a href="#contact" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white w-full">
+                    Get Started
+                  </Button>
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Hero Section */}
@@ -181,38 +466,145 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            {/* Large Logo Image */}
+            {/* Professional Logo Display with Enhanced Animations */}
             <motion.div
-              initial={{ scale: 0, opacity: 0, rotate: -180 }}
-              animate={{ scale: 1, opacity: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 100, delay: 0.2, duration: 1 }}
-              className="mb-8"
-              whileHover={{ 
-                scale: 1.05,
-                rotate: [0, -5, 5, -5, 0],
-                transition: { duration: 0.5 }
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 80, 
+                damping: 12,
+                delay: 0.2
               }}
+              className="mb-10 relative"
             >
-              <motion.img 
-                src="https://customer-assets.emergentagent.com/job_5dad80a5-5b92-47a9-9d97-b86aa98507ee/artifacts/2wtib7ez_Screenshot%202025-10-07%20201022.png" 
-                alt="TechyHive Logo" 
-                className="w-64 h-64 mx-auto object-contain drop-shadow-2xl"
-                animate={{
-                  filter: [
-                    "drop-shadow(0 0 20px rgba(249, 115, 22, 0.3))",
-                    "drop-shadow(0 0 40px rgba(249, 115, 22, 0.5))",
-                    "drop-shadow(0 0 20px rgba(249, 115, 22, 0.3))"
-                  ]
+              {/* Animated Gradient Background */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <motion.div
+                  className="w-96 h-96 rounded-full bg-gradient-to-r from-orange-500/10 via-orange-400/15 to-yellow-500/10 blur-3xl"
+                  animate={{
+                    scale: [1, 1.15, 1],
+                    opacity: [0.4, 0.6, 0.4],
+                    rotate: [0, 180, 360]
+                  }}
+                  transition={{ 
+                    duration: 8, 
+                    repeat: Infinity, 
+                    ease: "linear" 
+                  }}
+                />
+              </div>
+
+              {/* Orbiting Subtle Dots */}
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 bg-orange-500/40 rounded-full"
+                  style={{
+                    top: '50%',
+                    left: '50%',
+                    marginLeft: '-4px',
+                    marginTop: '-4px'
+                  }}
+                  animate={{
+                    x: [0, Math.cos((i * 120 + 0) * Math.PI / 180) * 160, Math.cos((i * 120 + 120) * Math.PI / 180) * 160, Math.cos((i * 120 + 240) * Math.PI / 180) * 160, 0],
+                    y: [0, Math.sin((i * 120 + 0) * Math.PI / 180) * 160, Math.sin((i * 120 + 120) * Math.PI / 180) * 160, Math.sin((i * 120 + 240) * Math.PI / 180) * 160, 0],
+                    opacity: [0.3, 0.6, 0.3, 0.6, 0.3]
+                  }}
+                  transition={{
+                    duration: 6,
+                    repeat: Infinity,
+                    delay: i * 2,
+                    ease: "easeInOut"
+                  }}
+                />
+              ))}
+
+              {/* Logo Container with Enhanced Effects */}
+              <motion.div
+                className="relative z-10 group"
+                whileHover={{ 
+                  scale: 1.08,
+                  rotate: [0, -2, 2, -2, 0]
                 }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                {/* Hexagonal Border Effect */}
+                <motion.div
+                  className="absolute inset-0 flex items-center justify-center"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                >
+                  <svg width="310" height="310" viewBox="0 0 310 310" className="absolute opacity-20">
+                    <polygon
+                      points="155,10 265,77.5 265,232.5 155,300 45,232.5 45,77.5"
+                      fill="none"
+                      stroke="url(#hexGradient)"
+                      strokeWidth="2"
+                    />
+                    <defs>
+                      <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#f97316" stopOpacity="0.5" />
+                        <stop offset="50%" stopColor="#fb923c" stopOpacity="0.7" />
+                        <stop offset="100%" stopColor="#fdba74" stopOpacity="0.5" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </motion.div>
+
+                {/* Logo with Enhanced Shadow */}
+                <motion.img 
+                  src="/images/logo.png" 
+                  alt="TechyHive Logo" 
+                  className="w-72 h-72 mx-auto object-contain relative"
+                  animate={{
+                    filter: [
+                      "drop-shadow(0 10px 30px rgba(249, 115, 22, 0.25)) brightness(1)",
+                      "drop-shadow(0 15px 45px rgba(249, 115, 22, 0.4)) brightness(1.05)",
+                      "drop-shadow(0 10px 30px rgba(249, 115, 22, 0.25)) brightness(1)"
+                    ]
+                  }}
+                  transition={{ 
+                    duration: 3.5, 
+                    repeat: Infinity, 
+                    ease: "easeInOut" 
+                  }}
+                />
+
+                {/* Shine Effect on Hover */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                  initial={{ x: '-100%', opacity: 0 }}
+                  whileHover={{ x: '100%', opacity: 1 }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  style={{ pointerEvents: 'none' }}
+                />
+              </motion.div>
             </motion.div>
 
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="text-white">Transforming Ideas into</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">
-                Digital Solutions
+                <TypeAnimation
+                  sequence={[
+                    'Digital Solutions',
+                    2000,
+                    'Web Applications',
+                    2000,
+                    'Mobile Apps',
+                    2000,
+                    'AI Solutions',
+                    2000,
+                    'Blockchain Apps',
+                    2000,
+                    'IoT Systems',
+                    2000,
+                  ]}
+                  wrapper="span"
+                  speed={50}
+                  repeat={Infinity}
+                />
               </span>
             </h1>
             
@@ -270,10 +662,22 @@ const Home = () => {
               className="flex flex-wrap justify-center gap-4 mb-16"
             >
               <a href="#contact">
-                <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 text-lg">
-                  Start Your Project
-                  <Send className="ml-2 w-5 h-5" />
-                </Button>
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(249, 115, 22, 0.5)',
+                      '0 0 30px rgba(249, 115, 22, 0.8)',
+                      '0 0 20px rgba(249, 115, 22, 0.5)'
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="rounded-lg"
+                >
+                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 text-lg">
+                    Start Your Project
+                    <Send className="ml-2 w-5 h-5" />
+                  </Button>
+                </motion.div>
               </a>
               <a 
                 href="https://www.instagram.com/techyhive.in?igsh=MXFzbWk1OTQ1NDQ4cg==" 
@@ -292,7 +696,7 @@ const Home = () => {
               </a>
             </motion.div>
 
-            {/* Stats Row */}
+            {/* Stats Row with Animated Counters */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -300,10 +704,10 @@ const Home = () => {
               className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
             >
               {[
-                { value: "500+", label: "Projects Completed", delay: 0.9 },
-                { value: "50+", label: "Happy Clients", delay: 1.0 },
-                { value: "5", label: "Years Experience", delay: 1.1 },
-                { value: "24/7", label: "Support Available", delay: 1.2 }
+                { value: 50, suffix: "+", label: "Projects Completed", delay: 0.9 },
+                { value: 20, suffix: "+", label: "Happy Clients", delay: 1.0 },
+                { value: 2, suffix: "", label: "Years Experience", delay: 1.1 },
+                { value: 24, suffix: "/7", label: "Support Available", delay: 1.2 }
               ].map((stat, idx) => (
                 <motion.div 
                   key={idx}
@@ -324,7 +728,7 @@ const Home = () => {
                     }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    {stat.value}
+                    <AnimatedCounter end={stat.value} suffix={stat.suffix} duration={2.5} />
                   </motion.div>
                   <div className="text-sm text-gray-400">{stat.label}</div>
                 </motion.div>
@@ -333,6 +737,9 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Animated Divider */}
+      <SectionDivider />
 
       {/* Services Section */}
       <section id="services" className="py-20 px-6">
@@ -380,6 +787,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <SectionDivider />
 
       {/* Tech Workspace Showcase Section */}
       <section className="py-20 px-6 bg-slate-900 relative overflow-hidden">
@@ -446,6 +855,7 @@ const Home = () => {
                   src="https://images.unsplash.com/photo-1512686096451-a15c19314d59?w=1200&q=80" 
                   alt="Professional workspace"
                   className="w-full h-auto"
+                  loading="lazy"
                 />
               </motion.div>
               <motion.div 
@@ -457,6 +867,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <SectionDivider />
 
       {/* Portfolio Section */}
       <section id="portfolio" className="py-20 px-6 bg-slate-800/30">
@@ -479,7 +891,7 @@ const Home = () => {
                 title: "AI Chatbot System", 
                 category: "Machine Learning", 
                 description: "Advanced conversational AI with NLP capabilities",
-                image: "https://images.unsplash.com/photo-1717501217835-821cc3aefbc3?w=800&q=80"
+                image: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&q=80"
               },
               { 
                 title: "IoT Smart Home", 
@@ -554,10 +966,6 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mt-12"
           >
-            <p className="text-gray-400 mb-4">Want to see more of our work?</p>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-              View Complete Portfolio
-            </Button>
           </motion.div>
         </div>
       </section>
@@ -579,41 +987,75 @@ const Home = () => {
               </p>
               
               <Accordion type="single" collapsible className="space-y-3">
-                <AccordionItem value="item-1" className="border border-slate-700 rounded-lg px-4 bg-slate-800/50">
-                  <AccordionTrigger className="text-white hover:text-orange-500 hover:no-underline">
-                    Expert Team
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400">
-                    Our team consists of experienced developers and researchers with deep knowledge in various CS domains.
-                  </AccordionContent>
-                </AccordionItem>
-                
-                <AccordionItem value="item-2" className="border border-slate-700 rounded-lg px-4 bg-slate-800/50">
-                  <AccordionTrigger className="text-white hover:text-orange-500 hover:no-underline">
-                    Timely Delivery
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400">
-                    We understand deadlines matter. Get your projects delivered on time, every time.
-                  </AccordionContent>
-                </AccordionItem>
-                
-                <AccordionItem value="item-3" className="border border-slate-700 rounded-lg px-4 bg-slate-800/50">
-                  <AccordionTrigger className="text-white hover:text-orange-500 hover:no-underline">
-                    Quality Assured
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400">
-                    All projects undergo rigorous quality checks to ensure they meet academic standards.
-                  </AccordionContent>
-                </AccordionItem>
-                
-                <AccordionItem value="item-4" className="border border-slate-700 rounded-lg px-4 bg-slate-800/50">
-                  <AccordionTrigger className="text-white hover:text-orange-500 hover:no-underline">
-                    24/7 Support
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400">
-                    Have questions? Our support team is always ready to help you throughout the project lifecycle.
-                  </AccordionContent>
-                </AccordionItem>
+                {[
+                  {
+                    value: "item-1",
+                    title: "Expert Team",
+                    content: "Our team consists of experienced developers and researchers with deep knowledge in various CS domains.",
+                    delay: 0
+                  },
+                  {
+                    value: "item-2",
+                    title: "Timely Delivery",
+                    content: "We understand deadlines matter. Get your projects delivered on time, every time.",
+                    delay: 0.1
+                  },
+                  {
+                    value: "item-3",
+                    title: "Quality Assured",
+                    content: "All projects undergo rigorous quality checks to ensure they meet academic standards.",
+                    delay: 0.2
+                  },
+                  {
+                    value: "item-4",
+                    title: "24/7 Support",
+                    content: "Have questions? Our support team is always ready to help you throughout the project lifecycle.",
+                    delay: 0.3
+                  }
+                ].map((item, idx) => (
+                  <motion.div
+                    key={item.value}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: item.delay, type: "spring", stiffness: 100 }}
+                  >
+                    <AccordionItem 
+                      value={item.value} 
+                      className="group border border-slate-700 rounded-lg px-4 bg-slate-800/50 hover:bg-slate-800/70 hover:border-orange-500/40 transition-all duration-300 overflow-hidden relative"
+                    >
+                      {/* Hover Glow Effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      />
+                      
+                      {/* Animated Border Accent */}
+                      <motion.div
+                        className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-500 to-yellow-500 scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top"
+                      />
+
+                      <AccordionTrigger className="relative text-white hover:text-orange-500 hover:no-underline py-4">
+                        <motion.span
+                          whileHover={{ x: 5 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          {item.title}
+                        </motion.span>
+                      </AccordionTrigger>
+                      
+                      <AccordionContent className="text-gray-400">
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="pb-4"
+                        >
+                          {item.content}
+                        </motion.div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </motion.div>
+                ))}
               </Accordion>
             </motion.div>
 
@@ -623,67 +1065,101 @@ const Home = () => {
               viewport={{ once: true }}
               className="relative"
             >
-              {/* Background Image */}
+              {/* Animated Background Blobs */}
               <motion.div 
-                className="absolute inset-0 rounded-2xl overflow-hidden"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <img 
-                  src="https://images.unsplash.com/photo-1593720219128-218edc93bdc0?w=800&q=80" 
-                  alt="Coding workspace"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-orange-900/80" />
-              </motion.div>
+                className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl"
+                animate={{ 
+                  scale: [1, 1.3, 1],
+                  opacity: [0.3, 0.6, 0.3],
+                  x: [0, 20, 0],
+                  y: [0, -20, 0]
+                }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div 
+                className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-500/20 rounded-full blur-3xl"
+                animate={{ 
+                  scale: [1, 1.3, 1],
+                  opacity: [0.3, 0.6, 0.3],
+                  x: [0, -20, 0],
+                  y: [0, 20, 0]
+                }}
+                transition={{ duration: 6, repeat: Infinity, delay: 1, ease: "easeInOut" }}
+              />
 
-              <div className="relative z-10 p-8 rounded-2xl border border-orange-500/30 shadow-xl shadow-orange-500/10">
+              <div className="relative z-10 p-8 rounded-2xl backdrop-blur-xl bg-slate-800/40 border border-slate-700/50 shadow-2xl">
                 <div className="grid grid-cols-2 gap-6">
-                  <motion.div 
-                    className="text-center p-4 bg-slate-700/30 backdrop-blur-sm rounded-lg border border-orange-500/20"
-                    whileHover={{ scale: 1.05, backgroundColor: "rgba(51, 65, 85, 0.5)" }}
-                  >
-                    <div className="text-4xl font-bold text-orange-500 mb-2">500+</div>
-                    <div className="text-gray-400 text-sm">Projects Delivered</div>
-                  </motion.div>
-                  <motion.div 
-                    className="text-center p-4 bg-slate-700/30 backdrop-blur-sm rounded-lg border border-orange-500/20"
-                    whileHover={{ scale: 1.05, backgroundColor: "rgba(51, 65, 85, 0.5)" }}
-                  >
-                    <div className="text-4xl font-bold text-orange-500 mb-2">98%</div>
-                    <div className="text-gray-400 text-sm">Success Rate</div>
-                  </motion.div>
-                  <motion.div 
-                    className="text-center p-4 bg-slate-700/30 backdrop-blur-sm rounded-lg border border-orange-500/20"
-                    whileHover={{ scale: 1.05, backgroundColor: "rgba(51, 65, 85, 0.5)" }}
-                  >
-                    <div className="text-4xl font-bold text-orange-500 mb-2">24/7</div>
-                    <div className="text-gray-400 text-sm">Support</div>
-                  </motion.div>
-                  <motion.div 
-                    className="text-center p-4 bg-slate-700/30 backdrop-blur-sm rounded-lg border border-orange-500/20"
-                    whileHover={{ scale: 1.05, backgroundColor: "rgba(51, 65, 85, 0.5)" }}
-                  >
-                    <div className="text-4xl font-bold text-orange-500 mb-2">100%</div>
-                    <div className="text-gray-400 text-sm">Satisfaction</div>
-                  </motion.div>
+                  {[
+                    { value: 50, suffix: "+", label: "Projects Delivered", delay: 0 },
+                    { value: 98, suffix: "%", label: "Success Rate", delay: 0.1 },
+                    { value: 24, suffix: "/7", label: "Support", delay: 0.2 },
+                    { value: 100, suffix: "%", label: "Satisfaction", delay: 0.3 }
+                  ].map((stat, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: stat.delay, type: "spring", stiffness: 200 }}
+                      whileHover={{ y: -5, scale: 1.05 }}
+                      className="group"
+                    >
+                      <div className="relative">
+                        {/* Glassmorphism Card */}
+                        <div className="relative text-center p-5 backdrop-blur-md bg-slate-700/30 rounded-xl border border-slate-600/30 group-hover:border-orange-500/50 transition-all duration-300 overflow-hidden">
+                          {/* Animated Gradient Overlay */}
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-yellow-500/10 opacity-0 group-hover:opacity-100"
+                            transition={{ duration: 0.3 }}
+                          />
+                          
+                          {/* Glow Effect */}
+                          <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/20 to-transparent blur-lg" />
+                          </div>
+
+                          {/* Content */}
+                          <div className="relative z-10">
+                            <motion.div
+                              className="text-4xl font-bold mb-2 bg-gradient-to-r from-orange-400 via-orange-500 to-yellow-500 bg-clip-text text-transparent"
+                              initial={{ opacity: 0 }}
+                              whileInView={{ opacity: 1 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: stat.delay + 0.2 }}
+                            >
+                              <AnimatedCounter end={stat.value} suffix={stat.suffix} duration={2} />
+                            </motion.div>
+                            <div className="text-gray-300 text-sm font-medium">{stat.label}</div>
+                          </div>
+
+                          {/* Corner Accent */}
+                          <motion.div
+                            className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-orange-500/20 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100"
+                            animate={{ rotate: [0, 90, 0] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          />
+                        </div>
+
+                        {/* Pulsing Shadow */}
+                        <motion.div
+                          className="absolute inset-0 -z-10 rounded-xl bg-orange-500/20 blur-lg opacity-0 group-hover:opacity-100"
+                          animate={{
+                            scale: [1, 1.05, 1],
+                            opacity: [0.3, 0.5, 0.3]
+                          }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
-              <motion.div 
-                className="absolute -top-4 -right-4 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl"
-                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 4, repeat: Infinity }}
-              />
-              <motion.div 
-                className="absolute -bottom-4 -left-4 w-32 h-32 bg-yellow-500/20 rounded-full blur-3xl"
-                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 4, repeat: Infinity, delay: 2 }}
-              />
             </motion.div>
           </div>
         </div>
       </section>
+
+      <SectionDivider />
 
       {/* Testimonials Section */}
       <section id="testimonials" className="py-20 px-6">
@@ -700,49 +1176,77 @@ const Home = () => {
             <p className="text-gray-400 text-lg">Hear what our clients say about us</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
+          {/* Carousel Container */}
+          <div className="relative px-4 md:px-12">
+            {/* Previous Button */}
+            <button
+              onClick={prevTestimonial}
+              className="absolute -left-4 md:left-0 top-1/2 -translate-y-1/2 z-50 bg-orange-500 hover:bg-orange-600 text-white p-2 md:p-3 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95"
+              aria-label="Previous testimonial"
+              type="button"
+            >
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={nextTestimonial}
+              className="absolute -right-4 md:right-0 top-1/2 -translate-y-1/2 z-50 bg-orange-500 hover:bg-orange-600 text-white p-2 md:p-3 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95"
+              aria-label="Next testimonial"
+              type="button"
+            >
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+            </button>
+
+            {/* Single Testimonial Display */}
+            <AnimatePresence mode="wait">
               <motion.div
-                key={testimonial.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10, scale: 1.02 }}
+                key={currentTestimonial}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.3 }}
+                className="grid md:grid-cols-3 gap-6"
               >
-                <Card className="bg-slate-800/50 border-slate-700 hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 h-full">
-                  <CardHeader>
-                    <motion.div 
-                      className="flex gap-1 mb-3"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      transition={{ delay: index * 0.1 + 0.2 }}
-                    >
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ scale: 0, rotate: -180 }}
-                          whileInView={{ scale: 1, rotate: 0 }}
-                          transition={{ delay: index * 0.1 + 0.3 + i * 0.05, type: "spring" }}
-                        >
-                          <Star className="w-4 h-4 fill-orange-500 text-orange-500" />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                    <CardDescription className="text-gray-300 text-base mb-4">
-                      "{testimonial.content}"
-                    </CardDescription>
-                    <div>
-                      <div className="font-semibold text-white">{testimonial.name}</div>
-                      <div className="text-sm text-gray-500">{testimonial.role}</div>
-                    </div>
-                  </CardHeader>
-                </Card>
+                {testimonials.slice(currentTestimonial, currentTestimonial + 3).map((testimonial, index) => (
+                  <Card key={testimonial.id} className="bg-slate-800/50 border-slate-700 hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 h-full">
+                    <CardHeader>
+                      <div className="flex gap-1 mb-3">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-orange-500 text-orange-500" />
+                        ))}
+                      </div>
+                      <CardDescription className="text-gray-300 text-base mb-4">
+                        "{testimonial.content}"
+                      </CardDescription>
+                      <div>
+                        <div className="font-semibold text-white">{testimonial.name}</div>
+                        <div className="text-sm text-gray-500">{testimonial.role}</div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
               </motion.div>
-            ))}
+            </AnimatePresence>
+
+            {/* Dots Indicator */}
+            <div className="flex justify-center gap-2 mt-8">
+              {[...Array(Math.ceil(testimonials.length / 3))].map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTestimonial(index * 3)}
+                  className={`h-2 rounded-full transition-all ${
+                    Math.floor(currentTestimonial / 3) === index ? 'bg-orange-500 w-8' : 'bg-gray-600 w-2'
+                  }`}
+                  aria-label={`Go to testimonial set ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
+      <SectionDivider />
 
       {/* Process/Technology Showcase */}
       <section className="py-20 px-6 bg-slate-900">
@@ -792,7 +1296,7 @@ const Home = () => {
                 >
                   <Card className="bg-slate-800/50 border-slate-700 hover:border-orange-500/50 transition-all duration-300 h-full overflow-hidden group">
                     <div className="h-48 relative overflow-hidden">
-                      <motion.img 
+                      <motion.img
                         src={tech.image}
                         alt={tech.title}
                         className="w-full h-full object-cover"
@@ -801,7 +1305,7 @@ const Home = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent" />
                       <div className="absolute bottom-4 left-4">
-                        <motion.div 
+                        <motion.div
                           className="w-12 h-12 rounded-lg bg-orange-500/20 backdrop-blur-sm border border-orange-500/40 flex items-center justify-center"
                           whileHover={{ rotate: 360, scale: 1.2 }}
                           transition={{ duration: 0.5 }}
@@ -826,6 +1330,160 @@ const Home = () => {
         </div>
       </section>
 
+      <SectionDivider />
+
+      {/* Call-to-Action Section */}
+      <section className="py-20 px-6 bg-slate-900 relative overflow-hidden">
+        {/* Subtle Background Elements */}
+        <div className="absolute inset-0 opacity-30">
+          <motion.div
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1, 1.1, 1],
+              x: [0, 30, 0],
+              y: [0, 20, 0]
+            }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1, 1.15, 1],
+              x: [0, -30, 0],
+              y: [0, -20, 0]
+            }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          />
+        </div>
+
+        <div className="container mx-auto max-w-5xl relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            {/* Main Heading */}
+            <motion.h2 
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              Ready to Build Your{' '}
+              <span className="text-orange-500">Dream Project?</span>
+            </motion.h2>
+
+            {/* Subheading */}
+            <motion.p 
+              className="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              Join <span className="text-orange-500 font-semibold">50+ satisfied students</span> who have achieved academic excellence with our expert development services.
+            </motion.p>
+
+            {/* CTA Cards Grid */}
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
+              {[
+                {
+                  icon: CheckCircle2,
+                  title: "Fast Delivery",
+                  description: "Projects delivered on time, every time",
+                  delay: 0.4
+                },
+                {
+                  icon: Sparkles,
+                  title: "Quality Code",
+                  description: "Clean, documented, academic-standard code",
+                  delay: 0.5
+                },
+                {
+                  icon: Star,
+                  title: "Expert Support",
+                  description: "24/7 assistance throughout your journey",
+                  delay: 0.6
+                }
+              ].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: item.delay }}
+                    whileHover={{ y: -3 }}
+                    className="group"
+                  >
+                    <div className="relative h-full">
+                      {/* Subtle Card */}
+                      <div className="relative backdrop-blur-sm bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 h-full overflow-hidden group-hover:border-orange-500/30 transition-all duration-300">
+                        {/* Subtle Gradient Overlay */}
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100"
+                          transition={{ duration: 0.3 }}
+                        />
+
+                        {/* Content */}
+                        <div className="relative z-10">
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-700/50 border border-orange-500/20 flex items-center justify-center group-hover:border-orange-500/40 transition-colors">
+                            <Icon className="w-6 h-6 text-orange-500" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                          <p className="text-gray-400 text-sm">{item.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.7 }}
+            >
+              <motion.a
+                href="#contact"
+                className="inline-block group relative"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="relative px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg text-white font-semibold text-base flex items-center gap-2 group-hover:from-orange-600 group-hover:to-orange-700 transition-all duration-300 shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/30">
+                  <span>Start Your Project Now</span>
+                  <motion.div
+                    animate={{ x: [0, 3, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Send className="w-4 h-4" />
+                  </motion.div>
+                </div>
+              </motion.a>
+            </motion.div>
+
+            {/* Trust Badge */}
+            <motion.p
+              className="text-gray-500 text-sm mt-6"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.8 }}
+            >
+              🔒 Secure • ⚡ Quick Response • ✨ Free Consultation
+            </motion.p>
+          </motion.div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
       {/* Contact Form Section */}
       <section id="contact" className="py-20 px-6 bg-slate-800/30 relative overflow-hidden">
         {/* Background Pattern */}
@@ -834,6 +1492,7 @@ const Home = () => {
             src="https://images.unsplash.com/photo-1596784326488-23581279e33d?w=1920&q=80" 
             alt="Background"
             className="w-full h-full object-cover"
+            loading="lazy"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-slate-800/50 to-slate-900/80" />
@@ -875,9 +1534,12 @@ const Home = () => {
                         value={formData.name}
                         onChange={handleInputChange}
                         placeholder="Your full name"
-                        className="bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500"
-                        required
+                        className={`bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500 ${formErrors.name ? 'border-red-500' : ''}`}
+                        disabled={isSubmitting}
                       />
+                      {formErrors.name && (
+                        <p className="text-red-400 text-xs mt-1">{formErrors.name}</p>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm text-gray-300 mb-2 block">Email *</label>
@@ -887,9 +1549,12 @@ const Home = () => {
                         value={formData.email}
                         onChange={handleInputChange}
                         placeholder="your@email.com"
-                        className="bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500"
-                        required
+                        className={`bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500 ${formErrors.email ? 'border-red-500' : ''}`}
+                        disabled={isSubmitting}
                       />
+                      {formErrors.email && (
+                        <p className="text-red-400 text-xs mt-1">{formErrors.email}</p>
+                      )}
                     </div>
                   </div>
 
@@ -901,8 +1566,12 @@ const Home = () => {
                         value={formData.phone}
                         onChange={handleInputChange}
                         placeholder="+91 1234567890"
-                        className="bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500"
+                        className={`bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500 ${formErrors.phone ? 'border-red-500' : ''}`}
+                        disabled={isSubmitting}
                       />
+                      {formErrors.phone && (
+                        <p className="text-red-400 text-xs mt-1">{formErrors.phone}</p>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm text-gray-300 mb-2 block">Deadline (Optional)</label>
@@ -912,6 +1581,7 @@ const Home = () => {
                         value={formData.deadline}
                         onChange={handleInputChange}
                         className="bg-slate-900/50 border-slate-600 text-white"
+                        disabled={isSubmitting}
                       />
                     </div>
                   </div>
@@ -919,8 +1589,12 @@ const Home = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm text-gray-300 mb-2 block">Project Type *</label>
-                      <Select name="projectType" onValueChange={(value) => handleSelectChange('projectType', value)}>
-                        <SelectTrigger className="bg-slate-900/50 border-slate-600 text-white">
+                      <Select 
+                        name="projectType" 
+                        onValueChange={(value) => handleSelectChange('projectType', value)}
+                        disabled={isSubmitting}
+                      >
+                        <SelectTrigger className={`bg-slate-900/50 border-slate-600 text-white ${formErrors.projectType ? 'border-red-500' : ''}`}>
                           <SelectValue placeholder="Select project type" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-600">
@@ -931,10 +1605,17 @@ const Home = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      {formErrors.projectType && (
+                        <p className="text-red-400 text-xs mt-1">{formErrors.projectType}</p>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm text-gray-300 mb-2 block">Domain (Optional)</label>
-                      <Select name="domain" onValueChange={(value) => handleSelectChange('domain', value)}>
+                      <Select 
+                        name="domain" 
+                        onValueChange={(value) => handleSelectChange('domain', value)}
+                        disabled={isSubmitting}
+                      >
                         <SelectTrigger className="bg-slate-900/50 border-slate-600 text-white">
                           <SelectValue placeholder="Select domain" />
                         </SelectTrigger>
@@ -957,6 +1638,7 @@ const Home = () => {
                       onChange={handleInputChange}
                       placeholder="Your budget range"
                       className="bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500"
+                      disabled={isSubmitting}
                     />
                   </div>
 
@@ -966,19 +1648,32 @@ const Home = () => {
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      placeholder="Describe your project requirements in detail..."
-                      className="bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500 min-h-32"
-                      required
+                      placeholder="Describe your project requirements in detail... (minimum 10 characters)"
+                      className={`bg-slate-900/50 border-slate-600 text-white placeholder:text-gray-500 min-h-32 ${formErrors.description ? 'border-red-500' : ''}`}
+                      disabled={isSubmitting}
                     />
+                    {formErrors.description && (
+                      <p className="text-red-400 text-xs mt-1">{formErrors.description}</p>
+                    )}
                   </div>
 
                   <Button 
                     type="submit" 
                     size="lg" 
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isSubmitting}
                   >
-                    Submit Request
-                    <Send className="ml-2 w-5 h-5" />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        Submit Request
+                        <Send className="ml-2 w-5 h-5" />
+                      </>
+                    )}
                   </Button>
                 </form>
               </CardContent>
@@ -988,12 +1683,16 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 border-t border-slate-800 py-12 px-6">
+      <footer className="bg-slate-900 border-t border-slate-800 py-12 px-6" style={{ borderBottom: 'none' }}>
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <Hexagon className="w-8 h-8 text-orange-500 fill-orange-500/20" />
+                <img 
+                  src="/images/logo.png" 
+                  alt="TechyHive Logo" 
+                  className="w-12 h-12 object-contain"
+                />
                 <span className="text-xl font-bold">
                   <span className="text-orange-500">Techy</span>
                   <span className="text-white">Hive</span>
@@ -1040,6 +1739,7 @@ const Home = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 

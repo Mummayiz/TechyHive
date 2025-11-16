@@ -42,7 +42,7 @@ export const services = [
 export const testimonials = [
   {
     id: 1,
-    name: "Priya Sharma",
+    name: "Mohammed Ahmed",
     role: "Computer Science Student",
     content: "TechyHive delivered my machine learning project ahead of schedule. The code quality and documentation were exceptional!",
     rating: 5
@@ -59,6 +59,48 @@ export const testimonials = [
     name: "Ananya Patel",
     role: "Final Year Student",
     content: "Amazing service! They helped me with my final year project and portfolio. Highly recommended for all CS students.",
+    rating: 5
+  },
+  {
+    id: 4,
+    name: "Arjun Singh",
+    role: "MCA Student",
+    content: "Outstanding work on my web development project! The code was clean, well-documented, and exactly what I needed for my presentation.",
+    rating: 5
+  },
+  {
+    id: 5,
+    name: "Sneha Reddy",
+    role: "B.Tech CSE",
+    content: "They helped me with my IoT project and survey paper. Professional service with timely delivery. Will definitely use again!",
+    rating: 5
+  },
+  {
+    id: 6,
+    name: "Vikram Kumar",
+    role: "Computer Engineering",
+    content: "The AI implementation they provided was top-notch. Great communication throughout the project and excellent final results.",
+    rating: 5
+  },
+  {
+    id: 7,
+    name: "Parveez Sulthana",
+    role: "Information Technology",
+    content: "Perfect solution for my cloud computing project. The team was very responsive and made all the changes I requested promptly.",
+    rating: 5
+  },
+  {
+    id: 8,
+    name: "Aditya Mishra",
+    role: "Software Engineering",
+    content: "Excellent work on my data science project! The analysis was thorough and the visualization were impressive. Highly professional!",
+    rating: 5
+  },
+  {
+    id: 9,
+    name: "Ishita Joshi",
+    role: "CS Final Year",
+    content: "Got my cybersecurity implementation paper done with complete code and documentation. Best decision for my final year project!",
     rating: 5
   }
 ];

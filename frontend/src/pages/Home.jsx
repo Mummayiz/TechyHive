@@ -140,8 +140,8 @@ const Home = () => {
     setIsSubmitting(true);
 
     try {
-      // Use Render backend with cron keep-alive
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://techyhive-backend.onrender.com';
+      // Use relative URL for API on same Vercel domain
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
       console.log('Submitting to:', `${backendUrl}/api/contact`);
       
       // Add timeout controller (60 seconds for cold starts)

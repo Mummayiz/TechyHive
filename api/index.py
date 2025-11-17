@@ -15,9 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import email service
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
+# Import email service from the same directory
 from email_service import email_service
 
 # Create the main app

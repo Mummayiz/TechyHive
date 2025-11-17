@@ -207,7 +207,13 @@ async def get_contact_submission(submission_id: str):
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=[
+        "https://techyhivewebsite.vercel.app",
+        "https://techyhive.in", 
+        "https://www.techyhive.in",
+        "http://localhost:3000",
+        "*"
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )

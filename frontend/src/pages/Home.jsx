@@ -140,7 +140,7 @@ const Home = () => {
     setIsSubmitting(true);
 
     try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://techyhive-backend.onrender.com';
       console.log('Submitting to:', `${backendUrl}/api/contact`);
       const response = await fetch(`${backendUrl}/api/contact`, {
         method: 'POST',
@@ -689,9 +689,9 @@ const Home = () => {
                   Follow Us
                 </Button>
               </a>
-              <a href="#portfolio">
+              <a href="#contact">
                 <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg">
-                  View Our Work
+                  Get In Touch
                 </Button>
               </a>
             </motion.div>

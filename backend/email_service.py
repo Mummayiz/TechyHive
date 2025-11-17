@@ -1,42 +1,58 @@
-import aiosmtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import os
 import logging
+import httpx
 
 logger = logging.getLogger(__name__)
 
 
 class EmailService:
     def __init__(self):
-        self.smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
-        self.smtp_port = int(os.environ.get('SMTP_PORT', '587'))
-        self.smtp_user = os.environ.get('SMTP_USER')
-        self.smtp_password = os.environ.get('SMTP_PASSWORD')
-        self.from_email = os.environ.get('SMTP_FROM_EMAIL')
+        self.sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
+        self.from_email = os.environ.get('SMTP_FROM_EMAIL', 'techyhive03@gmail.com')
         self.from_name = os.environ.get('SMTP_FROM_NAME', 'TechyHive')
 
     async def send_email(self, to_email: str, subject: str, html_content: str):
-        """Send an email using Gmail SMTP"""
+        """Send an email using SendGrid API"""
         try:
-            message = MIMEMultipart('alternative')
-            message['Subject'] = subject
-            message['From'] = f"{self.from_name} <{self.from_email}>"
-            message['To'] = to_email
+            if not self.sendgrid_api_key:
+                logger.error("SendGrid API key not configured")
+                return False
 
-            html_part = MIMEText(html_content, 'html')
-            message.attach(html_part)
+            url = "https://api.sendgrid.com/v3/mail/send"
+            headers = {
+                "Authorization": f"Bearer {self.sendgrid_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "personalizations": [
+                    {
+                        "to": [{"email": to_email}],
+                        "subject": subject
+                    }
+                ],
+                "from": {
+                    "email": self.from_email,
+                    "name": self.from_name
+                },
+                "content": [
+                    {
+                        "type": "text/html",
+                        "value": html_content
+                    }
+                ]
+            }
 
-            await aiosmtplib.send(
-                message,
-                hostname=self.smtp_host,
-                port=self.smtp_port,
-                username=self.smtp_user,
-                password=self.smtp_password,
-                start_tls=True,
-            )
-            logger.info(f"Email sent successfully to {to_email}")
-            return True
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=payload, headers=headers)
+                
+                if response.status_code == 202:
+                    logger.info(f"Email sent successfully to {to_email}")
+                    return True
+                else:
+                    logger.error(f"Failed to send email to {to_email}: Status {response.status_code}, Response: {response.text}")
+                    return False
+                    
         except Exception as e:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
             return False

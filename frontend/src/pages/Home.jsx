@@ -140,7 +140,8 @@ const Home = () => {
     setIsSubmitting(true);
 
     try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://techyhive-backend.onrender.com';
+      // Use same domain for API (Vercel serverless backend)
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
       console.log('Submitting to:', `${backendUrl}/api/contact`);
       
       // Add timeout controller (60 seconds for cold starts)

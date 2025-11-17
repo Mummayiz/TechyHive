@@ -142,6 +142,11 @@ const Home = () => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://techyhive-backend.onrender.com';
       console.log('Submitting to:', `${backendUrl}/api/contact`);
+      
+      // Add timeout controller (60 seconds for cold starts)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      
       const response = await fetch(`${backendUrl}/api/contact`, {
         method: 'POST',
         headers: {
@@ -157,7 +162,10 @@ const Home = () => {
           budget: formData.budget,
           description: formData.description
         }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       console.log('Response status:', response.status);
       if (!response.ok) {
@@ -186,9 +194,20 @@ const Home = () => {
       });
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Failed to submit request. Please try again.', {
-        duration: 4000,
-      });
+      
+      if (error.name === 'AbortError') {
+        toast.error('⏱️ Request timed out. The server might be waking up. Please try again in a moment.', {
+          duration: 6000,
+        });
+      } else if (error.message.includes('Failed to fetch')) {
+        toast.error('❌ Unable to connect to server. Please check your internet connection.', {
+          duration: 5000,
+        });
+      } else {
+        toast.error('❌ Failed to submit request. Please try again.', {
+          duration: 4000,
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

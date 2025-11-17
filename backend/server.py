@@ -82,6 +82,18 @@ class ContactSubmissionCreate(BaseModel):
 async def root():
     return {"message": "Hello World"}
 
+@api_router.get("/debug/env")
+async def debug_env():
+    """Debug endpoint to check environment variables"""
+    return {
+        "smtp_host": os.environ.get('SMTP_HOST', 'NOT_SET'),
+        "smtp_port": os.environ.get('SMTP_PORT', 'NOT_SET'),
+        "smtp_user": os.environ.get('SMTP_USER', 'NOT_SET'),
+        "smtp_password": "***" if os.environ.get('SMTP_PASSWORD') else 'NOT_SET',
+        "smtp_from_email": os.environ.get('SMTP_FROM_EMAIL', 'NOT_SET'),
+        "smtp_from_name": os.environ.get('SMTP_FROM_NAME', 'NOT_SET'),
+    }
+
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_dict = input.model_dump()

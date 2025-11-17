@@ -295,8 +295,8 @@ email_service = EmailService()
 # Create the main app
 app = FastAPI()
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+# Create a router WITHOUT /api prefix (Vercel routing already handles this)
+api_router = APIRouter()
 
 # Define Models
 class ContactSubmissionCreate(BaseModel):

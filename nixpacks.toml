@@ -5,6 +5,7 @@ nixPkgs = ["python310", "python310Packages.pip"]
 cmds = ["cd backend && pip install --break-system-packages -r requirements.txt"]
 
 [phases.build]
+cmds = ["echo 'Build complete - packages already installed'"]
 
 [start]
 cmd = "cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT"

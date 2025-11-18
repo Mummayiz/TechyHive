@@ -221,6 +221,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_origins=[
         "https://techyhivewebsite.vercel.app",
+        "https://techy-hive.vercel.app",
         "https://techyhive.in", 
         "https://www.techyhive.in",
         "http://localhost:3000",

@@ -1,3 +1,6 @@
+[providers]
+python = false
+
 [phases.setup]
 nixPkgs = ["python310", "python310Packages.pip"]
 
@@ -5,7 +8,6 @@ nixPkgs = ["python310", "python310Packages.pip"]
 cmds = ["cd backend && pip install --break-system-packages -r requirements.txt"]
 
 [phases.build]
-cmds = []
 
 [start]
 cmd = "cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT"

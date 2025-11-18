@@ -140,13 +140,13 @@ const Home = () => {
     setIsSubmitting(true);
 
     try {
-      // Use relative URL for API on same Vercel domain
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      // Railway backend URL
+      const backendUrl = 'https://techyhive-production.up.railway.app';
       console.log('Submitting to:', `${backendUrl}/api/contact`);
       
-      // Add timeout controller (60 seconds for cold starts)
+      // Add timeout controller (10 seconds - Railway is always warm)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       
       const response = await fetch(`${backendUrl}/api/contact`, {
         method: 'POST',
